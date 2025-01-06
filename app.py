@@ -45,7 +45,7 @@ def get_watering_info():
     plant = Plant.query.get(user.plant_id)
     return jsonify(
         {
-            "species": plant.species,
+            "type": plant.species,
             "watering_frequency": plant.watering_frequency,
             "next_watering_date": user.next_watering_date,
         }
