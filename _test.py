@@ -11,8 +11,10 @@ def test_client():
     # Используем SQLite в памяти для тестов
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    # Создаем и настраиваем клиент для тестов
     with app.app_context():  # Добавить контекст приложения
+        # Создаем все таблицы для тестирования
+        # Например, если у вас есть db.create_all(), можно использовать это
+        # db.create_all()
         with app.test_client() as client:
             yield client
 
@@ -60,6 +62,7 @@ def mock_plants_and_users():
 
 
 def test_get_plants(test_client, mock_plants_and_users):
+    # Мокируем запрос к базе данных
     with patch("models.Plant.query.all", return_value=mock_plants_and_users["plants"]):
         response = test_client.get("/plants")
         assert response.status_code == 200
@@ -70,23 +73,28 @@ def test_get_plants(test_client, mock_plants_and_users):
 
 
 def test_get_watering_info_valid_user(test_client, mock_plants_and_users):
-    with patch(
-        "models.User.query.filter_by", return_value=[mock_plants_and_users["users"][0]]
-    ):
-        with patch(
+    # Мокируем запросы для пользователей и растений
+    with (
+        patch(
+            "models.User.query.filter_by",
+            return_value=[mock_plants_and_users["users"][0]],
+        ),
+        patch(
             "models.Plant.query.get", return_value=mock_plants_and_users["plants"][2]
-        ):
-            response = test_client.get(
-                "/watering-info?username=cactuses&password=111cactus111"
-            )
-            assert response.status_code == 200
-            data = response.get_json()
-            assert data["species"] == "Кактус"
-            assert data["watering_frequency"] == "1 раз в неделю"
-            assert data["next_watering_date"] == "27.01.23"
+        ),
+    ):
+        response = test_client.get(
+            "/watering-info?username=cactuses&password=111cactus111"
+        )
+        assert response.status_code == 200
+        data = response.get_json()
+        assert data["species"] == "Кактус"
+        assert data["watering_frequency"] == "1 раз в неделю"
+        assert data["next_watering_date"] == "27.01.23"
 
 
 def test_get_watering_info_invalid_credentials(test_client, mock_plants_and_users):
+    # Мокируем запрос для отсутствующих пользователей
     with patch(
         "models.User.query.filter_by", return_value=[]
     ):  # Нет таких пользователей
