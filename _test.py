@@ -8,9 +8,8 @@ from models import Plant, User
 # Фикстура для тестового клиента
 @pytest.fixture
 def test_client():
-    app.config["SQLALCHEMY_DATABASE_URI"] = (
-        "postgresql://postgres:root@localhost/test_plant_watering"
-    )
+    # Используем SQLite в памяти для тестов
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     # Создаем и настраиваем клиент для тестов
     with app.app_context():  # Добавить контекст приложения
