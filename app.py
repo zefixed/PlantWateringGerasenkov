@@ -42,7 +42,6 @@ def get_watering_info():
     user = User.query.filter_by(username=username, password=password).first()
     if not user:
         return jsonify({"error": "Invalid credentials"}), 401
-
     plant = Plant.query.get(user.plant_id)
     return jsonify(
         {
